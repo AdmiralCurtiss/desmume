@@ -32,6 +32,7 @@ enum HotkeyPage {
 	HOTKEY_PAGE_STATE_SLOTS,
 	HOTKEY_PAGE_TURBO,
 	HOTKEY_PAGE_OTHER,
+	HOTKEY_PAGE_MATRIX,
 	NUM_HOTKEY_PAGE,
 };
 
@@ -43,6 +44,7 @@ static LPCTSTR hotkeyPageTitle[] = {
 	_T("Savestate Slots"),
 	_T("Turbo"),
 	_T("Other"),
+	_T("Projection Matrix"),
 	_T("NUM_HOTKEY_PAGE"),
 };
 
@@ -81,7 +83,11 @@ struct SCustomKeys
 	SCustomKey FrameAdvance, FastForward, FastForwardToggle, IncreaseSpeed, DecreaseSpeed, FrameLimitToggle, Microphone, IncreasePressure, DecreasePressure, ToggleStylusJitter;
 
 	SCustomKey PlayMovie, RecordMovie, StopMovie, ToggleReadOnly;
-	
+
+	SCustomKey ChangeMatrixDefault;
+	SCustomKey ChangeMatrix[9];
+	SCustomKey CustomMatrixStepUp, CustomMatrixStepDown, CustomMatrixIncrease, CustomMatrixDecrease, CustomMatrixNextIndex, CustomMatrixPreviousIndex;
+
 	SCustomKey TurboRight, TurboLeft, TurboDown, TurboUp, TurboSelect, TurboStart, TurboB, TurboA, TurboY, TurboX, TurboR, TurboL;
 
 	SCustomKey AutoHold, AutoHoldClear;

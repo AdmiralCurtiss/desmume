@@ -1,0 +1,7 @@
+/desmume/src/windows/__bins
+/desmume/src/windows/.libs
+/desmume/src/windows/.VS2015
+*.suo
+*.sdf
+*.opensdf
+desmume/src/windows/resources.aps

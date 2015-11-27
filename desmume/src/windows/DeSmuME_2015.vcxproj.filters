@@ -1592,6 +1592,9 @@
     <ClInclude Include="FEX_Interface.h">
       <Filter>Windows</Filter>
     </ClInclude>
+    <ClInclude Include="Header.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\instruction_tabdef.inc">

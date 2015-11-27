@@ -860,6 +860,7 @@
     <ClInclude Include="FirmConfig.h" />
     <ClInclude Include="fsnitroView.h" />
     <ClInclude Include="gbaslot_config.h" />
+    <ClInclude Include="Header.h" />
     <ClInclude Include="hotkey.h" />
     <ClInclude Include="importSave.h" />
     <ClInclude Include="inputdx.h" />

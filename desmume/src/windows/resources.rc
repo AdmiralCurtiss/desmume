@@ -2139,6 +2139,26 @@ END
 
 STRINGTABLE
 BEGIN
+    ID_LABEL_HK63           "Reset Matrix"
+    ID_LABEL_HK64           "Custom Matrix 1"
+    ID_LABEL_HK65           "Custom Matrix 2"
+    ID_LABEL_HK66           "Custom Matrix 3"
+    ID_LABEL_HK67           "Custom Matrix 4"
+    ID_LABEL_HK68           "Custom Matrix 5"
+    ID_LABEL_HK69           "Custom Matrix 6"
+    ID_LABEL_HK70           "Custom Matrix 7"
+    ID_LABEL_HK71           "Custom Matrix 8"
+    ID_LABEL_HK72           "Custom Matrix 9"
+    ID_LABEL_HK73           "Increase Step Size"
+    ID_LABEL_HK74           "Decrease Step Size"
+    ID_LABEL_HK75           "Add to Matrix"
+    ID_LABEL_HK76           "Subtract from Matrix"
+    ID_LABEL_HK77           "Increment Matrix Index"
+    ID_LABEL_HK78           "Decrement Matrix Index"
+END
+
+STRINGTABLE
+BEGIN
     ID_LABEL_HK16           "Toggle Frame Display"
     ID_LABEL_HK17           "Toggle FPS Display"
     ID_LABEL_HK18           "Toggle Input Display"

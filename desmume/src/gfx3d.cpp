@@ -60,6 +60,7 @@ u32 max_polys, max_verts;
 #include "GPU_OSD.h"
 #endif
 
+#include "windows\Header.h"
 
 /*
 thoughts on flush timing:
@@ -941,6 +942,13 @@ static void gfx3d_glLightDirection_cache(const size_t index)
 
 
 //===============================================================================
+
+static void PrintMatrix( s32* matrix ) {
+	for ( int i = 0; i < 15; ++i ) {
+		printf( "%08x, ", matrix[i] );
+	}
+	printf( "%08x\n", matrix[15] );
+}
 static void gfx3d_glMatrixMode(u32 v)
 {
 	mode = (MatrixMode)(v & 0x03);
@@ -1055,6 +1063,7 @@ static void gfx3d_glLoadIdentity()
 
 static BOOL gfx3d_glLoadMatrix4x4(s32 v)
 {
+
 	mtxCurrent[mode][ML4x4ind] = v;
 
 	++ML4x4ind;
@@ -1068,7 +1077,11 @@ static BOOL gfx3d_glLoadMatrix4x4(s32 v)
 	if (mode == MATRIXMODE_POSITION_VECTOR)
 		MatrixCopy(mtxCurrent[1], mtxCurrent[2]);
 
-	//printf("load4x4: matrix %d to: \n",mode); MatrixPrint(mtxCurrent[1]);
+	if ( mode == 0 ) {
+		printf( "load4x4: matrix %d to: ", mode );
+		PrintMatrix( mtxCurrent[mode] );
+	}
+
 	return TRUE;
 }
 
@@ -1091,12 +1104,40 @@ static BOOL gfx3d_glLoadMatrix4x3(s32 v)
 
 	if (mode == MATRIXMODE_POSITION_VECTOR)
 		MatrixCopy(mtxCurrent[1], mtxCurrent[2]);
-	//printf("load4x3: matrix %d to: \n",mode); MatrixPrint(mtxCurrent[1]);
+	if ( mode == 0 ) {
+		printf( "load4x3: matrix %d to: \n", mode );
+		PrintMatrix( mtxCurrent[mode] );
+	}
+
 	return TRUE;
 }
 
+
+extern s32 fakeMatrixMod[16] = {
+	0x00000000, 0x00000000, 0x00000000, 0x00000000,
+	0x00000000, 0x00000000, 0x00000000, 0x00000000,
+	0x00000000, 0x00000000, 0x00000000, 0x00000000,
+	0x00000000, 0x00000000, 0x00000000, 0x00000000,
+};
+extern int fakeMatrixModIdx = 0;
+extern int fakeMatrixModStep = 1024;
+extern bool enableDualStrikeHack = false;
+
 static BOOL gfx3d_glMultMatrix4x4(s32 v)
 {
+	//static s32 fakeMatrix[16] = {
+	//	0x000014c9, 0x00000000, 0x00000000, 0x00000000,
+	//	0x00000000, 0x00001bb6, 0x00000000, 0x00000000,
+	//	0x00000000, 0x00000000, 0xffffefff, 0xfffff000,
+	//	0x00000000, 0x00000000, 0xfffffffe, 0x00000000,
+	//};
+	static s32 dualStrikeMatrix[16] = {
+		0x000014c9, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00001b55, 0x000002a3, 0x000002a3,
+		0x00000000, 0x00000491, 0xfffff037, 0xfffff038,
+		0xffffeb37, 0x00001f27, 0x000019d1, 0x000019d2,
+	};
+
 	mtxTemporal[MM4x4ind] = v;
 
 	MM4x4ind++;
@@ -1115,7 +1156,114 @@ static BOOL gfx3d_glMultMatrix4x4(s32 v)
 		GFX_DELAY_M2(30);
 	}
 
-	//printf("mult4x4: matrix %d to: \n",mode); MatrixPrint(mtxCurrent[1]);
+	if ( mode == 0 ) {
+		//printf( "mult4x4: matrix %d to: ", mode );
+		//PrintMatrix( mtxCurrent[mode] );
+	}
+	if ( enableDualStrikeHack && mode == MATRIXMODE_PROJECTION && memcmp( mtxCurrent[0], dualStrikeMatrix, 12 * sizeof( s32 ) ) == 0 ) {
+		// we probably found the dual strike gameplay matrix, replace with custom
+		//printf( "replacing matrix!\n" );
+		//s32 fakeMatrix[16] = {
+		//	0x000014c9, 0x00000000, 0x00000000, 0x00000000,
+		//	0x00000000, 0x00001bb6, 0x00000000, 0x00000000,
+		//	0x00000000, 0x00000000, 0xffffefff, 0xfffff000,
+		//	0x00000000, 0x00000000, 0x00000000, 0x00001000,
+		//};
+		s32 fakeMatrix[16] = {
+			0x00000000, 0x00000000, 0x00000000, 0x00000000,
+			0x00000000, 0x00000000, 0x00000000, 0x00000000,
+			0x00000000, 0x00000000, 0x00000000, 0x00000000,
+			0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		};
+		
+
+
+		// tile calculation
+		s32 xi = mtxCurrent[mode][12];
+		s32 yi = mtxCurrent[mode][13];
+		double x = double( -xi - 5322 + 6 ) / 665.0; // this isn't 100% right but it's very close
+		double y = double( yi - 5350 + 6 ) / 875.0; // same
+		double yunmod = y;
+		//printf( "x = %f, y = %f", x, y );
+		x += 8.0;
+		y += 6.0;
+
+
+		// this corresponds to Y somehow
+		s32 si = mtxCurrent[mode][15];
+		double s = double( si - 6357 + 10 ) / 84; // even more off than x/y but still close-ish
+		//printf( ", s = %f", s );
+
+
+
+
+		double right = 1.00;
+		double left = -1.00;
+		double top = 0.75;
+		double bottom = -0.75;
+		double far = 1.0;
+		double near = -1.0;
+
+		static double oldx;
+		static double oldy;
+		if ( (int)yunmod != (int)s ) {
+			// this does the combat zoom in, super hacky but whatever
+			// TODO: This zooms on center of screen rather than the unit...
+			right *= double( si * 4096 / 6357 ) / 4096.0;
+			left *= double( si * 4096 / 6357 ) / 4096.0;
+			top *= double( si * 4096 / 6357 ) / 4096.0;
+			bottom *= double( si * 4096 / 6357 ) / 4096.0;
+			right += oldx * 0.125;
+			left += oldx * 0.125;
+			top -= oldy * 0.125;
+			bottom -= oldy * 0.125;
+			//fakeMatrix[15] = si * 4096 / 6357;
+			//printf( ", si = %d", si * 4096 / 6357 );
+		} else {
+			right += x * 0.125;
+			left += x * 0.125;
+			top -= y * 0.125;
+			bottom -= y * 0.125;
+			oldx = x;
+			oldy = y;
+		}
+
+
+		fakeMatrix[0] = (s32)( ( 2.0 / ( right - left ) ) * 4096.0 );
+		fakeMatrix[5] = (s32)( ( 2.0 / ( top - bottom ) ) * 4096.0 );
+		fakeMatrix[10] = (s32)( ( -2.0 / ( far - near ) ) * 4096.0 );
+		fakeMatrix[12] = (s32)( -( ( right + left ) / ( right - left ) ) * 4096.0 );
+		fakeMatrix[13] = (s32)( -( ( top + bottom ) / ( top - bottom ) ) * 4096.0 );
+		fakeMatrix[14] = (s32)( -( ( far + near ) / ( far - near ) ) * 4096.0 );
+		fakeMatrix[15] = 4096;
+
+		//fakeMatrix[0] *= 0.250;
+		//fakeMatrix[5] *= 0.250;
+		//fakeMatrix[10] *= 0.250;
+
+		//fakeMatrix[12] -= x * 0.125 * 4096.0;
+		//fakeMatrix[13] += y * 0.166666 * 4096.0;
+		
+
+
+		//fakeMatrix[15] = mtxCurrent[0][15];
+		//printf( ", %d", mtxCurrent[0][15] );
+
+		memcpy( mtxCurrent[0], fakeMatrix, 16 * sizeof( s32 ) );
+		//printf( "replaced matrix is: ", mode );
+		//PrintMatrix( mtxCurrent[mode] );
+		//printf( "r%f, l%f, t%f, b%f, n%f, f%f", right, left, top, bottom, near, far );
+		//mtxCurrent[mode][ML4x4ind] = fakeMatrix[ML4x4ind];
+		//printf( "\n" );
+	}
+
+	if ( mode == MATRIXMODE_PROJECTION ) {
+		PrintMatrix( fakeMatrixMod );
+		for ( int i = 0; i < 16; ++i ) {
+			mtxCurrent[0][i] = mtxCurrent[0][i] + fakeMatrixMod[i];
+		}
+		printf( "(step: %d) matrix[%d] = %d\n", fakeMatrixModStep, fakeMatrixModIdx, fakeMatrixMod[fakeMatrixModIdx] );
+	}
 
 	MatrixIdentity(mtxTemporal);
 	return TRUE;
@@ -1146,7 +1294,10 @@ static BOOL gfx3d_glMultMatrix4x3(s32 v)
 		GFX_DELAY_M2(30);
 	}
 
-	//printf("mult4x3: matrix %d to: \n",mode); MatrixPrint(mtxCurrent[1]);
+	if ( mode == 0 ) {
+		printf( "mult4x3: matrix %d to: \n", mode );
+		PrintMatrix( mtxCurrent[mode] );
+	}
 
 	//does this really need to be done?
 	MatrixIdentity(mtxTemporal);
@@ -1179,7 +1330,10 @@ static BOOL gfx3d_glMultMatrix3x3(s32 v)
 		GFX_DELAY_M2(30);
 	}
 
-	//printf("mult3x3: matrix %d to: \n",mode); MatrixPrint(mtxCurrent[1]);
+	if ( mode == 0 ) {
+		printf( "mult3x3: matrix %d to: \n", mode );
+		PrintMatrix( mtxCurrent[mode] );
+	}
 
 
 	//does this really need to be done?
@@ -1197,7 +1351,11 @@ static BOOL gfx3d_glScale(s32 v)
 	scaleind = 0;
 
 	MatrixScale(mtxCurrent[(mode == MATRIXMODE_POSITION_VECTOR ? MATRIXMODE_POSITION : mode)], scale);
-	//printf("scale: matrix %d to: \n",mode); MatrixPrint(mtxCurrent[1]);
+	if ( mode == 0 ) {
+		printf( "scale: matrix %d to: \n", mode );
+		PrintMatrix( mtxCurrent[mode] );
+	}
+
 
 	GFX_DELAY(22);
 
@@ -1228,7 +1386,10 @@ static BOOL gfx3d_glTranslate(s32 v)
 		GFX_DELAY_M2(30);
 	}
 
-	//printf("translate: matrix %d to: \n",mode); MatrixPrint(mtxCurrent[1]);
+	if ( mode == 0 ) {
+		printf( "translate: matrix %d to: \n", mode );
+		PrintMatrix( mtxCurrent[mode] );
+	}
 
 	return TRUE;
 }

@@ -140,6 +140,9 @@ void HK_SearchCheats(int, bool justPressed)
 	if (romloaded)
 		CheatsSearchDialog(MainWindow->getHWnd()); 
 }
+
+#include "windows\Header.h"
+
 void HK_QuickScreenShot(int param, bool justPressed)
 {
 	if(!romloaded) return;
@@ -340,6 +343,53 @@ void HK_DecreaseVolume(int, bool justPressed)
 }
 
 void HK_Reset(int, bool justPressed) {ResetGame();}
+
+
+
+
+
+void HK_ResetMatrx( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	enableDualStrikeHack = false;
+	for ( int i = 0; i < 16; ++i ) {
+		fakeMatrixMod[i] = 0;
+	}
+}
+void HK_DecrementMatrixIndex( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	--fakeMatrixModIdx;
+	if ( fakeMatrixModIdx < 0 ) {
+		fakeMatrixModIdx = 15;
+	}
+}
+void HK_IncrementMatrixIndex( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	++fakeMatrixModIdx;
+	if ( fakeMatrixModIdx >= 16 ) {
+		fakeMatrixModIdx = 0;
+	}
+}
+void HK_IncreaseMatrixStep( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	fakeMatrixModStep *= 2.0;
+}
+void HK_DecreaseMatrixStep( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	fakeMatrixModStep /= 2.0;
+	if ( fakeMatrixModStep == 0 ) {
+		fakeMatrixModStep = 1;
+	}
+}
+void HK_AddToMatrix( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	fakeMatrixMod[fakeMatrixModIdx] = fakeMatrixMod[fakeMatrixModIdx] + fakeMatrixModStep;
+}
+void HK_RemoveFromMatrix( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	fakeMatrixMod[fakeMatrixModIdx] = fakeMatrixMod[fakeMatrixModIdx] - fakeMatrixModStep;
+}
+
+
 
 void HK_RecordAVI(int, bool justPressed) { if (AVI_IsRecording()) AviEnd(); else AviRecordTo(); }
 void HK_RecordWAV(int, bool justPressed) { if (WAV_IsRecording()) WavEnd(); else WavRecordTo(WAVMODE_CORE); }
@@ -729,6 +779,103 @@ void InitCustomKeys (SCustomKeys *keys)
 	keys->RecordAVI.name = STRW(ID_LABEL_HK15);
 	keys->RecordAVI.page = HOTKEY_PAGE_MOVIE;
 	keys->RecordAVI.key = NULL;
+
+	//Matrix-------------------------------------------
+	keys->ChangeMatrixDefault.handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrixDefault.code = "ChangeMatrixDefault";
+	keys->ChangeMatrixDefault.name = STRW(ID_LABEL_HK63);
+	keys->ChangeMatrixDefault.page = HOTKEY_PAGE_MATRIX;
+	keys->ChangeMatrixDefault.key = VK_NUMPAD0;
+
+	keys->ChangeMatrix[0].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[0].code = "ChangeMatrix1";
+	keys->ChangeMatrix[0].name = STRW( ID_LABEL_HK64 );
+	keys->ChangeMatrix[0].page = HOTKEY_PAGE_MATRIX;
+	keys->ChangeMatrix[0].key = VK_NUMPAD1;
+
+	keys->ChangeMatrix[1].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[1].code = "ChangeMatrix2";
+	keys->ChangeMatrix[1].name = STRW( ID_LABEL_HK65 );
+	keys->ChangeMatrix[1].page = HOTKEY_PAGE_MATRIX;
+	keys->ChangeMatrix[1].key = VK_NUMPAD2;
+
+	keys->ChangeMatrix[2].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[2].code = "ChangeMatrix3";
+	keys->ChangeMatrix[2].name = STRW( ID_LABEL_HK66 );
+	keys->ChangeMatrix[2].page = HOTKEY_PAGE_MATRIX;
+	keys->ChangeMatrix[2].key = VK_NUMPAD3;
+
+	keys->ChangeMatrix[3].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[3].code = "ChangeMatrix4";
+	keys->ChangeMatrix[3].name = STRW( ID_LABEL_HK67 );
+	keys->ChangeMatrix[3].page = HOTKEY_PAGE_MATRIX;
+	keys->ChangeMatrix[3].key = VK_NUMPAD4;
+
+	keys->ChangeMatrix[4].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[4].code = "ChangeMatrix5";
+	keys->ChangeMatrix[4].name = STRW( ID_LABEL_HK68 );
+	keys->ChangeMatrix[4].page = HOTKEY_PAGE_MATRIX;
+	keys->ChangeMatrix[4].key = VK_NUMPAD5;
+
+	keys->ChangeMatrix[5].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[5].code = "ChangeMatrix6";
+	keys->ChangeMatrix[5].name = STRW( ID_LABEL_HK69 );
+	keys->ChangeMatrix[5].page = HOTKEY_PAGE_MATRIX;
+	keys->ChangeMatrix[5].key = VK_NUMPAD6;
+
+	keys->ChangeMatrix[6].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[6].code = "ChangeMatrix7";
+	keys->ChangeMatrix[6].name = STRW( ID_LABEL_HK70 );
+	keys->ChangeMatrix[6].page = HOTKEY_PAGE_MATRIX;
+	keys->ChangeMatrix[6].key = VK_NUMPAD7;
+
+	keys->ChangeMatrix[7].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[7].code = "ChangeMatrix8";
+	keys->ChangeMatrix[7].name = STRW( ID_LABEL_HK71 );
+	keys->ChangeMatrix[7].page = HOTKEY_PAGE_MATRIX;
+	keys->ChangeMatrix[7].key = VK_NUMPAD8;
+
+	keys->ChangeMatrix[8].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[8].code = "ChangeMatrix9";
+	keys->ChangeMatrix[8].name = STRW( ID_LABEL_HK72 );
+	keys->ChangeMatrix[8].page = HOTKEY_PAGE_MATRIX;
+	keys->ChangeMatrix[8].key = VK_NUMPAD9;
+
+	keys->CustomMatrixStepUp.handleKeyDown = HK_IncreaseMatrixStep;
+	keys->CustomMatrixStepUp.code = "CustomMatrixStepUp";
+	keys->CustomMatrixStepUp.name = STRW( ID_LABEL_HK73 );
+	keys->CustomMatrixStepUp.page = HOTKEY_PAGE_MATRIX;
+	keys->CustomMatrixStepUp.key = NULL;
+
+	keys->CustomMatrixStepDown.handleKeyDown = HK_DecreaseMatrixStep;
+	keys->CustomMatrixStepDown.code = "CustomMatrixStepDown";
+	keys->CustomMatrixStepDown.name = STRW( ID_LABEL_HK74 );
+	keys->CustomMatrixStepDown.page = HOTKEY_PAGE_MATRIX;
+	keys->CustomMatrixStepDown.key = NULL;
+
+	keys->CustomMatrixIncrease.handleKeyDown = HK_AddToMatrix;
+	keys->CustomMatrixIncrease.code = "CustomMatrixIncrease";
+	keys->CustomMatrixIncrease.name = STRW( ID_LABEL_HK75 );
+	keys->CustomMatrixIncrease.page = HOTKEY_PAGE_MATRIX;
+	keys->CustomMatrixIncrease.key = NULL;
+
+	keys->CustomMatrixDecrease.handleKeyDown = HK_RemoveFromMatrix;
+	keys->CustomMatrixDecrease.code = "CustomMatrixDecrease";
+	keys->CustomMatrixDecrease.name = STRW( ID_LABEL_HK76 );
+	keys->CustomMatrixDecrease.page = HOTKEY_PAGE_MATRIX;
+	keys->CustomMatrixDecrease.key = NULL;
+
+	keys->CustomMatrixNextIndex.handleKeyDown = HK_IncrementMatrixIndex;
+	keys->CustomMatrixNextIndex.code = "CustomMatrixNextIndex";
+	keys->CustomMatrixNextIndex.name = STRW( ID_LABEL_HK77 );
+	keys->CustomMatrixNextIndex.page = HOTKEY_PAGE_MATRIX;
+	keys->CustomMatrixNextIndex.key = NULL;
+
+	keys->CustomMatrixPreviousIndex.handleKeyDown = HK_DecrementMatrixIndex;
+	keys->CustomMatrixPreviousIndex.code = "CustomMatrixPreviousIndex";
+	keys->CustomMatrixPreviousIndex.name = STRW( ID_LABEL_HK78 );
+	keys->CustomMatrixPreviousIndex.page = HOTKEY_PAGE_MATRIX;
+	keys->CustomMatrixPreviousIndex.key = NULL;
 
 	//Turbo Page---------------------------------------
 	keys->TurboRight.handleKeyDown = HK_TurboRightKeyDown;
