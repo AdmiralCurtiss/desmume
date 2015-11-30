@@ -355,6 +355,60 @@ void HK_ResetMatrx( int, bool justPressed ) {
 		fakeMatrixMod[i] = 0;
 	}
 }
+void HK_SetMatrixDualStrikeOrtho( int, bool justPressed ) {
+	// This gives you a perfect orthographic projection, but with messed up sprite layers.
+	// If someone can figure out how to affect the Z order or draw order, please fix this and tell me!
+	if ( !justPressed ) { return; }
+	HK_ResetMatrx( 0, justPressed );
+	enableDualStrikeHack = true;
+}
+void HK_SetMatrixDualStrikeSortaOrtho( int, bool justPressed ) {
+	// This gives a less perfect projection, but at least the sprites show up.
+	if ( !justPressed ) { return; }
+	HK_ResetMatrx( 0, justPressed );
+	enableDualStrikeHack = true;
+	fakeMatrixMod[9] = 320;
+	fakeMatrixMod[11] = 1;
+}
+void HK_SetMatrixCustom1( int, bool justPressed ) {
+	// This gives an extremely bizarre view where all sprites are stretched towards the screen.
+	if ( !justPressed ) { return; }
+	HK_ResetMatrx( 0, justPressed );
+	enableDualStrikeHack = true;
+	fakeMatrixMod[9] = 43008;
+	fakeMatrixMod[11] = -43008;
+}
+void HK_SetMatrixCustom2( int, bool justPressed ) {
+	// This gives a not quite 45° rotated view, but with wrong panning.
+	if ( !justPressed ) { return; }
+	HK_ResetMatrx( 0, justPressed );
+	fakeMatrixMod[1] = 0xffffe800;
+	fakeMatrixMod[4] = 0x00001800;
+	fakeMatrixMod[12] = 0x00001200;
+	fakeMatrixMod[13] = 0x00002400;
+	fakeMatrixMod[15] = 0x00001800;
+}
+void HK_SetMatrixCustom3( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	HK_ResetMatrx( 0, justPressed );
+}
+void HK_SetMatrixCustom4( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	HK_ResetMatrx( 0, justPressed );
+}
+void HK_SetMatrixCustom5( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	HK_ResetMatrx( 0, justPressed );
+}
+void HK_SetMatrixCustom6( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	HK_ResetMatrx( 0, justPressed );
+}
+void HK_SetMatrixCustom7( int, bool justPressed ) {
+	if ( !justPressed ) { return; }
+	HK_ResetMatrx( 0, justPressed );
+}
+
 void HK_DecrementMatrixIndex( int, bool justPressed ) {
 	if ( !justPressed ) { return; }
 	--fakeMatrixModIdx;
@@ -787,55 +841,55 @@ void InitCustomKeys (SCustomKeys *keys)
 	keys->ChangeMatrixDefault.page = HOTKEY_PAGE_MATRIX;
 	keys->ChangeMatrixDefault.key = VK_NUMPAD0;
 
-	keys->ChangeMatrix[0].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[0].handleKeyDown = HK_SetMatrixCustom1;
 	keys->ChangeMatrix[0].code = "ChangeMatrix1";
 	keys->ChangeMatrix[0].name = STRW( ID_LABEL_HK64 );
 	keys->ChangeMatrix[0].page = HOTKEY_PAGE_MATRIX;
 	keys->ChangeMatrix[0].key = VK_NUMPAD1;
 
-	keys->ChangeMatrix[1].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[1].handleKeyDown = HK_SetMatrixCustom2;
 	keys->ChangeMatrix[1].code = "ChangeMatrix2";
 	keys->ChangeMatrix[1].name = STRW( ID_LABEL_HK65 );
 	keys->ChangeMatrix[1].page = HOTKEY_PAGE_MATRIX;
 	keys->ChangeMatrix[1].key = VK_NUMPAD2;
 
-	keys->ChangeMatrix[2].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[2].handleKeyDown = HK_SetMatrixCustom3;
 	keys->ChangeMatrix[2].code = "ChangeMatrix3";
 	keys->ChangeMatrix[2].name = STRW( ID_LABEL_HK66 );
 	keys->ChangeMatrix[2].page = HOTKEY_PAGE_MATRIX;
 	keys->ChangeMatrix[2].key = VK_NUMPAD3;
 
-	keys->ChangeMatrix[3].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[3].handleKeyDown = HK_SetMatrixCustom4;
 	keys->ChangeMatrix[3].code = "ChangeMatrix4";
 	keys->ChangeMatrix[3].name = STRW( ID_LABEL_HK67 );
 	keys->ChangeMatrix[3].page = HOTKEY_PAGE_MATRIX;
 	keys->ChangeMatrix[3].key = VK_NUMPAD4;
 
-	keys->ChangeMatrix[4].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[4].handleKeyDown = HK_SetMatrixCustom5;
 	keys->ChangeMatrix[4].code = "ChangeMatrix5";
 	keys->ChangeMatrix[4].name = STRW( ID_LABEL_HK68 );
 	keys->ChangeMatrix[4].page = HOTKEY_PAGE_MATRIX;
 	keys->ChangeMatrix[4].key = VK_NUMPAD5;
 
-	keys->ChangeMatrix[5].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[5].handleKeyDown = HK_SetMatrixCustom6;
 	keys->ChangeMatrix[5].code = "ChangeMatrix6";
 	keys->ChangeMatrix[5].name = STRW( ID_LABEL_HK69 );
 	keys->ChangeMatrix[5].page = HOTKEY_PAGE_MATRIX;
 	keys->ChangeMatrix[5].key = VK_NUMPAD6;
 
-	keys->ChangeMatrix[6].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[6].handleKeyDown = HK_SetMatrixCustom7;
 	keys->ChangeMatrix[6].code = "ChangeMatrix7";
 	keys->ChangeMatrix[6].name = STRW( ID_LABEL_HK70 );
 	keys->ChangeMatrix[6].page = HOTKEY_PAGE_MATRIX;
 	keys->ChangeMatrix[6].key = VK_NUMPAD7;
 
-	keys->ChangeMatrix[7].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[7].handleKeyDown = HK_SetMatrixDualStrikeSortaOrtho;
 	keys->ChangeMatrix[7].code = "ChangeMatrix8";
 	keys->ChangeMatrix[7].name = STRW( ID_LABEL_HK71 );
 	keys->ChangeMatrix[7].page = HOTKEY_PAGE_MATRIX;
 	keys->ChangeMatrix[7].key = VK_NUMPAD8;
 
-	keys->ChangeMatrix[8].handleKeyDown = HK_ResetMatrx;
+	keys->ChangeMatrix[8].handleKeyDown = HK_SetMatrixDualStrikeOrtho;
 	keys->ChangeMatrix[8].code = "ChangeMatrix9";
 	keys->ChangeMatrix[8].name = STRW( ID_LABEL_HK72 );
 	keys->ChangeMatrix[8].page = HOTKEY_PAGE_MATRIX;

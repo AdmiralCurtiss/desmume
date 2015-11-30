@@ -1113,7 +1113,7 @@ static BOOL gfx3d_glLoadMatrix4x3(s32 v)
 }
 
 
-extern s32 fakeMatrixMod[16] = {
+extern u32 fakeMatrixMod[16] = {
 	0x00000000, 0x00000000, 0x00000000, 0x00000000,
 	0x00000000, 0x00000000, 0x00000000, 0x00000000,
 	0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -1131,7 +1131,7 @@ static BOOL gfx3d_glMultMatrix4x4(s32 v)
 	//	0x00000000, 0x00000000, 0xffffefff, 0xfffff000,
 	//	0x00000000, 0x00000000, 0xfffffffe, 0x00000000,
 	//};
-	static s32 dualStrikeMatrix[16] = {
+	static u32 dualStrikeMatrix[16] = {
 		0x000014c9, 0x00000000, 0x00000000, 0x00000000,
 		0x00000000, 0x00001b55, 0x000002a3, 0x000002a3,
 		0x00000000, 0x00000491, 0xfffff037, 0xfffff038,
@@ -1160,7 +1160,8 @@ static BOOL gfx3d_glMultMatrix4x4(s32 v)
 		//printf( "mult4x4: matrix %d to: ", mode );
 		//PrintMatrix( mtxCurrent[mode] );
 	}
-	if ( enableDualStrikeHack && mode == MATRIXMODE_PROJECTION && memcmp( mtxCurrent[0], dualStrikeMatrix, 12 * sizeof( s32 ) ) == 0 ) {
+	bool isDualStrikeMainScreen = memcmp( mtxCurrent[0], dualStrikeMatrix, 12 * sizeof( s32 ) ) == 0;
+	if ( isDualStrikeMainScreen && mode == MATRIXMODE_PROJECTION && enableDualStrikeHack ) {
 		// we probably found the dual strike gameplay matrix, replace with custom
 		//printf( "replacing matrix!\n" );
 		//s32 fakeMatrix[16] = {
@@ -1257,8 +1258,8 @@ static BOOL gfx3d_glMultMatrix4x4(s32 v)
 		//printf( "\n" );
 	}
 
-	if ( mode == MATRIXMODE_PROJECTION ) {
-		PrintMatrix( fakeMatrixMod );
+	if ( isDualStrikeMainScreen && mode == MATRIXMODE_PROJECTION ) {
+		PrintMatrix( (s32*)fakeMatrixMod );
 		for ( int i = 0; i < 16; ++i ) {
 			mtxCurrent[0][i] = mtxCurrent[0][i] + fakeMatrixMod[i];
 		}
