@@ -350,7 +350,7 @@ void HK_Reset(int, bool justPressed) {ResetGame();}
 
 void HK_ResetMatrx( int, bool justPressed ) {
 	if ( !justPressed ) { return; }
-	enableDualStrikeHack = false;
+	DualStrikeMatrixParams.Type = DualStrikeMatrixParameters::DUAL_STRIKE_MATRIX_KEEP_ORIGINAL;
 	for ( int i = 0; i < 16; ++i ) {
 		fakeMatrixMod[i] = 0;
 	}
@@ -360,13 +360,13 @@ void HK_SetMatrixDualStrikeOrtho( int, bool justPressed ) {
 	// If someone can figure out how to affect the Z order or draw order, please fix this and tell me!
 	if ( !justPressed ) { return; }
 	HK_ResetMatrx( 0, justPressed );
-	enableDualStrikeHack = true;
+	DualStrikeMatrixParams.Type = DualStrikeMatrixParameters::DUAL_STRIKE_MATRIX_ORTHOGRAPHIC;
 }
 void HK_SetMatrixDualStrikeSortaOrtho( int, bool justPressed ) {
 	// This gives a less perfect projection, but at least the sprites show up.
 	if ( !justPressed ) { return; }
 	HK_ResetMatrx( 0, justPressed );
-	enableDualStrikeHack = true;
+	DualStrikeMatrixParams.Type = DualStrikeMatrixParameters::DUAL_STRIKE_MATRIX_ORTHOGRAPHIC;
 	fakeMatrixMod[9] = 320;
 	fakeMatrixMod[11] = 1;
 }
@@ -374,7 +374,7 @@ void HK_SetMatrixCustom1( int, bool justPressed ) {
 	// This gives an extremely bizarre view where all sprites are stretched towards the screen.
 	if ( !justPressed ) { return; }
 	HK_ResetMatrx( 0, justPressed );
-	enableDualStrikeHack = true;
+	DualStrikeMatrixParams.Type = DualStrikeMatrixParameters::DUAL_STRIKE_MATRIX_ORTHOGRAPHIC;
 	fakeMatrixMod[9] = 43008;
 	fakeMatrixMod[11] = -43008;
 }
@@ -389,16 +389,27 @@ void HK_SetMatrixCustom2( int, bool justPressed ) {
 	fakeMatrixMod[15] = 0x00001800;
 }
 void HK_SetMatrixCustom3( int, bool justPressed ) {
+	// This gives what can almost be described as a diorama.
 	if ( !justPressed ) { return; }
 	HK_ResetMatrx( 0, justPressed );
+	DualStrikeMatrixParams.Type = DualStrikeMatrixParameters::DUAL_STRIKE_MATRIX_ORTHOGRAPHIC;
+	fakeMatrixMod[7] = 8192;
+	fakeMatrixMod[9] = 43008;
+	fakeMatrixMod[11] = -49152;
+	fakeMatrixMod[13] = -3072;
+	fakeMatrixMod[15] = 19456;
 }
 void HK_SetMatrixCustom4( int, bool justPressed ) {
 	if ( !justPressed ) { return; }
 	HK_ResetMatrx( 0, justPressed );
+	fakeMatrixMod[13] = -6144;
+	fakeMatrixMod[14] = -8192;
+	fakeMatrixMod[15] = 4096;
 }
 void HK_SetMatrixCustom5( int, bool justPressed ) {
 	if ( !justPressed ) { return; }
 	HK_ResetMatrx( 0, justPressed );
+	fakeMatrixMod[9] = 81920;
 }
 void HK_SetMatrixCustom6( int, bool justPressed ) {
 	if ( !justPressed ) { return; }
@@ -407,6 +418,7 @@ void HK_SetMatrixCustom6( int, bool justPressed ) {
 void HK_SetMatrixCustom7( int, bool justPressed ) {
 	if ( !justPressed ) { return; }
 	HK_ResetMatrx( 0, justPressed );
+	DualStrikeMatrixParams.Type = DualStrikeMatrixParameters::DUAL_STRIKE_MATRIX_PERSPECTIVE;
 }
 
 void HK_DecrementMatrixIndex( int, bool justPressed ) {

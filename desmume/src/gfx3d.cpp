@@ -1121,7 +1121,7 @@ extern u32 fakeMatrixMod[16] = {
 };
 extern int fakeMatrixModIdx = 0;
 extern int fakeMatrixModStep = 1024;
-extern bool enableDualStrikeHack = false;
+extern DualStrikeMatrixParameters DualStrikeMatrixParams = DualStrikeMatrixParameters();
 
 static BOOL gfx3d_glMultMatrix4x4(s32 v)
 {
@@ -1160,24 +1160,21 @@ static BOOL gfx3d_glMultMatrix4x4(s32 v)
 		//printf( "mult4x4: matrix %d to: ", mode );
 		//PrintMatrix( mtxCurrent[mode] );
 	}
-	bool isDualStrikeMainScreen = memcmp( mtxCurrent[0], dualStrikeMatrix, 12 * sizeof( s32 ) ) == 0;
-	if ( isDualStrikeMainScreen && mode == MATRIXMODE_PROJECTION && enableDualStrikeHack ) {
-		// we probably found the dual strike gameplay matrix, replace with custom
-		//printf( "replacing matrix!\n" );
-		//s32 fakeMatrix[16] = {
-		//	0x000014c9, 0x00000000, 0x00000000, 0x00000000,
-		//	0x00000000, 0x00001bb6, 0x00000000, 0x00000000,
-		//	0x00000000, 0x00000000, 0xffffefff, 0xfffff000,
-		//	0x00000000, 0x00000000, 0x00000000, 0x00001000,
-		//};
+	bool isDualStrikeMainScreen = mode == MATRIXMODE_PROJECTION && memcmp( mtxCurrent[0], dualStrikeMatrix, 12 * sizeof( s32 ) ) == 0;
+	if ( isDualStrikeMainScreen ) {
 		s32 fakeMatrix[16] = {
 			0x00000000, 0x00000000, 0x00000000, 0x00000000,
 			0x00000000, 0x00000000, 0x00000000, 0x00000000,
 			0x00000000, 0x00000000, 0x00000000, 0x00000000,
 			0x00000000, 0x00000000, 0x00000000, 0x00000000,
 		};
-		
 
+		double right = 1.00;
+		double left = -1.00;
+		double top = 0.75;
+		double bottom = -0.75;
+		double far = 1.0;
+		double near = -1.0;
 
 		// tile calculation
 		s32 xi = mtxCurrent[mode][12];
@@ -1189,21 +1186,10 @@ static BOOL gfx3d_glMultMatrix4x4(s32 v)
 		x += 8.0;
 		y += 6.0;
 
-
 		// this corresponds to Y somehow
 		s32 si = mtxCurrent[mode][15];
 		double s = double( si - 6357 + 10 ) / 84; // even more off than x/y but still close-ish
-		//printf( ", s = %f", s );
-
-
-
-
-		double right = 1.00;
-		double left = -1.00;
-		double top = 0.75;
-		double bottom = -0.75;
-		double far = 1.0;
-		double near = -1.0;
+												  //printf( ", s = %f", s );
 
 		static double oldx;
 		static double oldy;
@@ -1229,36 +1215,63 @@ static BOOL gfx3d_glMultMatrix4x4(s32 v)
 			oldy = y;
 		}
 
+		// we probably found the dual strike gameplay matrix, replace with custom
+		if ( DualStrikeMatrixParams.Type == DualStrikeMatrixParameters::DUAL_STRIKE_MATRIX_ORTHOGRAPHIC ) {
+			fakeMatrix[0] = (s32)( ( 2.0 / ( right - left ) ) * 4096.0 );
+			fakeMatrix[5] = (s32)( ( 2.0 / ( top - bottom ) ) * 4096.0 );
+			fakeMatrix[10] = (s32)( ( -2.0 / ( far - near ) ) * 4096.0 );
+			fakeMatrix[12] = (s32)( -( ( right + left ) / ( right - left ) ) * 4096.0 );
+			fakeMatrix[13] = (s32)( -( ( top + bottom ) / ( top - bottom ) ) * 4096.0 );
+			fakeMatrix[14] = (s32)( -( ( far + near ) / ( far - near ) ) * 4096.0 );
+			fakeMatrix[15] = 4096;
 
-		fakeMatrix[0] = (s32)( ( 2.0 / ( right - left ) ) * 4096.0 );
-		fakeMatrix[5] = (s32)( ( 2.0 / ( top - bottom ) ) * 4096.0 );
-		fakeMatrix[10] = (s32)( ( -2.0 / ( far - near ) ) * 4096.0 );
-		fakeMatrix[12] = (s32)( -( ( right + left ) / ( right - left ) ) * 4096.0 );
-		fakeMatrix[13] = (s32)( -( ( top + bottom ) / ( top - bottom ) ) * 4096.0 );
-		fakeMatrix[14] = (s32)( -( ( far + near ) / ( far - near ) ) * 4096.0 );
-		fakeMatrix[15] = 4096;
+			//fakeMatrix[0] *= 0.250;
+			//fakeMatrix[5] *= 0.250;
+			//fakeMatrix[10] *= 0.250;
 
-		//fakeMatrix[0] *= 0.250;
-		//fakeMatrix[5] *= 0.250;
-		//fakeMatrix[10] *= 0.250;
+			//fakeMatrix[12] -= x * 0.125 * 4096.0;
+			//fakeMatrix[13] += y * 0.166666 * 4096.0;
 
-		//fakeMatrix[12] -= x * 0.125 * 4096.0;
-		//fakeMatrix[13] += y * 0.166666 * 4096.0;
-		
+			memcpy( mtxCurrent[0], fakeMatrix, 16 * sizeof( s32 ) );
+			//printf( "replaced matrix is: ", mode );
+			//PrintMatrix( mtxCurrent[mode] );
+			//printf( "r%f, l%f, t%f, b%f, n%f, f%f", right, left, top, bottom, near, far );
+			//printf( "\n" );
+		}
+		if ( DualStrikeMatrixParams.Type == DualStrikeMatrixParameters::DUAL_STRIKE_MATRIX_PERSPECTIVE ) {
+			// This doesn't actually give very interesting results, basically the same as ortho stuff just worse...
 
+			double fovy = 40;
+			double aspect = 1.33315;
+			double far = 1000.0;
+			double near = 1.0;
+			double f = 1.0 / std::tan( fovy / 2.0 );
 
-		//fakeMatrix[15] = mtxCurrent[0][15];
-		//printf( ", %d", mtxCurrent[0][15] );
+			// persp
+			fakeMatrix[0] = (s32)( ( f / aspect ) * 4096.0 );
+			fakeMatrix[5] = (s32)( ( f ) * 4096.0 );
+			fakeMatrix[10] = (s32)( ( ( far + near ) / ( near - far ) ) * 4096.0 );
+			fakeMatrix[14] = (s32)( ( ( 2.0 * far * near ) / ( near - far ) ) * 4096.0 );
+			fakeMatrix[11] = -4096 + 3552;
 
-		memcpy( mtxCurrent[0], fakeMatrix, 16 * sizeof( s32 ) );
-		//printf( "replaced matrix is: ", mode );
-		//PrintMatrix( mtxCurrent[mode] );
-		//printf( "r%f, l%f, t%f, b%f, n%f, f%f", right, left, top, bottom, near, far );
-		//mtxCurrent[mode][ML4x4ind] = fakeMatrix[ML4x4ind];
-		//printf( "\n" );
-	}
+			fakeMatrix[14] = 9216 - 8192;
+			fakeMatrix[15] = 1292 + 80;
 
-	if ( isDualStrikeMainScreen && mode == MATRIXMODE_PROJECTION ) {
+			fakeMatrix[12] -= ( 1381.0 + ( x - 8.0 ) * 172.5 );
+			fakeMatrix[13] += ( 1289.0 + ( y - 6.0 ) * 175.0 );
+
+			// frustum
+			//fakeMatrix[0] = (s32)( ( ( 2.0 * ( near ) ) / ( right - left ) ) * 4096.0 );
+			//fakeMatrix[5] = (s32)( ( ( 2.0 * ( near ) ) / ( top - bottom ) ) * 4096.0 );
+			//fakeMatrix[11] = -4096;
+			//fakeMatrix[8] = (s32)( ( ( right + left ) / ( right - left ) ) * 4096.0 );
+			//fakeMatrix[9] = (s32)( ( ( top + bottom ) / ( top - bottom ) ) * 4096.0 );
+			//fakeMatrix[10] = (s32)( -( ( far + near ) / ( far - near ) ) * 4096.0 );
+			//fakeMatrix[14] = (s32)( -( ( 2.0 * far * near ) / ( far - near ) ) * 4096.0 );
+
+			memcpy( mtxCurrent[0], fakeMatrix, 16 * sizeof( s32 ) );
+		}
+
 		PrintMatrix( (s32*)fakeMatrixMod );
 		for ( int i = 0; i < 16; ++i ) {
 			mtxCurrent[0][i] = mtxCurrent[0][i] + fakeMatrixMod[i];
